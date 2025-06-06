@@ -34,4 +34,4 @@ jobs:
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
 
       - name: Deploy and run on Modal
-        run: modal serve deploy.py
+        run: modal run deploy.py
