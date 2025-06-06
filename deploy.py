@@ -10,8 +10,8 @@ image = (
 
 @app.function(
     image=image,
-    max_containers=1,        # ✅ 新参数名，替换 concurrency_limit
-    min_containers=1,        # ✅ 新参数名，替换 keep_warm
+    max_containers=1,      # ✅ 正确的新参数名
+    min_containers=1,      # ✅ 正确的新参数名
     timeout=86400,
 )
 def run_app():
@@ -29,5 +29,8 @@ def run_app():
         for line in process.stdout:
             print(line.strip())
 
-if __name__ == "__main__":
-    app.deploy()
+# ❌ 不需要 app.deploy()，因为你是通过 CLI 部署
+# ✅ 可选：添加一个 local_entrypoint 手动触发 run_app（在本地或 CLI 运行用）
+@app.local_entrypoint()
+def main():
+    run_app.remote()
