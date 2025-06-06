@@ -26,7 +26,7 @@ def run_script():
     try:
         os.chdir(WORKSPACE_PATH)
         print(f"🏃 Starting {SCRIPT_NAME} in {os.getcwd()}")
-        
+
         result = subprocess.run(
             [sys.executable, SCRIPT_NAME],
             check=True,
@@ -43,7 +43,7 @@ def run_script():
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", action="store_true")
     args = parser.parse_args()
