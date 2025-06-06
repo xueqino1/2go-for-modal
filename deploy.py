@@ -1,30 +1,55 @@
 import modal
+import os
 
-app = modal.App("persistent_app")
+# 配置常量
+APP_NAME = os.getenv("MODAL_APP_NAME", "python-sandbox")
+WORKSPACE_PATH = "/workspace"
+SCRIPT_NAME = "app.py"  # 替换为你的主脚本
 
-image = (
-    modal.Image.debian_slim()
-    .apt_install("curl")
-    .pip_install_from_requirements("requirements.txt")
-    .add_local_dir(".", remote_path="/workspace")
-)
+# 初始化应用
+app = modal.App(name=APP_NAME)
 
-@app.schedule(cron="0 0 * * *")  # 每天凌晨
+def build_image():
+    """构建包含依赖的镜像"""
+    return (
+        modal.Image.debian_slim()
+        .pip_install_from_requirements("requirements.txt")
+        .add_local_directory(".", remote_path=WORKSPACE_PATH)
+    )
+
 @app.function(
-    image=image,
-    max_containers=1,
-    min_containers=1,
-    timeout=86400,   # 可选：每次最多活一天
+    image=build_image(),
+    timeout=86400,  # 24小时超时
+    secrets=[
+        modal.Secret.from_name("my-env-secrets")  # 可选：添加环境变量
+    ]
 )
-def run_app():
-    import os
+def run_script():
+    """执行目标Python脚本"""
     import subprocess
-    os.chdir("/workspace")
-    with subprocess.Popen(
-        ["python3", "app.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    ) as process:
-        for line in process.stdout:
-            print(line.strip())
+    import sys
+    
+    # 切换到工作目录
+    os.chdir(WORKSPACE_PATH)
+    print(f"🏃 Starting {SCRIPT_NAME} in {os.getcwd()}")
+    
+    # 执行脚本（同步阻塞式）
+    result = subprocess.run(
+        [sys.executable, SCRIPT_NAME],
+        capture_output=True,
+        text=True
+    )
+    
+    # 输出结果
+    if result.returncode == 0:
+        print("✅ Execution succeeded:")
+        print(result.stdout)
+    else:
+        print(f"❌ Execution failed (code {result.returncode}):")
+        print(result.stderr)
+        raise modal.exception.ExecutionError("Script execution failed")
+
+if __name__ == "__main__":
+    # 仅部署不自动运行
+    print(f"🚀 Deploying {APP_NAME}...")
+    app.deploy("sandbox-deployment")
