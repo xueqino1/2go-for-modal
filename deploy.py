@@ -1,30 +1,29 @@
 import modal
-import os
 import subprocess
 
-# 创建 Modal 应用
-app = modal.App(name="persistent_app")
+# 初始化应用 - 注意这行后面没有括号
+app = modal.App(name="persistent-app")
 
-# 定义镜像并添加本地目录（使用最新SDK方法名）
+# 构建镜像 - 特别注意括号对齐
 image = (
     modal.Image.debian_slim()
     .pip_install_from_requirements("requirements.txt")
-    .copy_local_dir(".", remote_path="/workspace")  # 修改为copy_local_dir
+    .copy_local_dir(".", remote_path="/workspace")
 )
 
-# 定义运行主函数
+# 定义函数 - 注意缩进统一4个空格
 @app.function(
     image=image,
-    concurrency_limit=1,  # 新版SDK仍支持
-    keep_warm=1,         # 新版SDK仍支持
-    timeout=86400,       # 24小时超时
+    concurrency_limit=1,
+    keep_warm=1,
+    timeout=86400
 )
 def run_app():
     import os
     import subprocess
-
+    
     os.chdir("/workspace")
-    print("🔄 Starting app.py...")
+    print("Starting app.py...")
     
     with subprocess.Popen(
         ["python3", "app.py"],
@@ -33,9 +32,8 @@ def run_app():
         text=True,
     ) as process:
         for line in process.stdout:
-            print(line.strip())  # 实时输出日志
+            print(line.strip())
 
-# 部署应用（不自动运行）
+# 主程序 - 注意缩进
 if __name__ == "__main__":
-    print("🚀 Deploying application...")
-    app.deploy("my-persistent-app")  # 添加部署名称便于管理
+    app.deploy()
