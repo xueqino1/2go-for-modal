@@ -10,8 +10,8 @@ image = (
 
 @app.function(
     image=image,
-    concurrency_limit=1,
-    keep_warm=1,
+    max_containers=1,      # ✅ 新参数名，替换掉旧的
+    min_containers=1,
     timeout=86400,
 )
 def run_app():
@@ -29,6 +29,8 @@ def run_app():
         for line in process.stdout:
             print(line.strip())
 
+# ✅ 增加 local_entrypoint，modal run 时触发远程调用
 @app.local_entrypoint()
 def main():
+    print("Triggering run_app remotely...")
     run_app.remote()
