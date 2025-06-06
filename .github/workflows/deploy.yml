@@ -1,8 +1,9 @@
 name: Deploy to Modal
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:   # 👈 允许手动触发
+  schedule:            # 👈 每天 UTC 时间 00:00 自动触发（可调整）
+    - cron: '0 0 * * *'
 
 jobs:
   deploy:
