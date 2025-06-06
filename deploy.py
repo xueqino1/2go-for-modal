@@ -1,47 +1,38 @@
 import modal
 
-APP_NAME = "flask_and_worker"
-WORKSPACE_PATH = "/workspace"
+app = modal.App(name="persistent_app")
 
-# 初始化 Modal 应用
-app = modal.App(name=APP_NAME)
-
-# 构建镜像
+# 构建镜像：安装 curl、安装 Python 依赖，并挂载项目代码
 image = (
     modal.Image.debian_slim()
-    .apt_install("curl")  # 安装 curl
-    .pip_install_from_requirements("requirements.txt")
-    .add_local_dir(".", remote_path=WORKSPACE_PATH)
+    .apt_install("curl")  # ✅ 安装 curl
+    .pip_install_from_requirements("requirements.txt")  # ✅ 安装 Flask、requests 等依赖
+    .add_local_dir(".", remote_path="/workspace")  # ✅ 挂载当前目录
 )
 
-# ✅ Web 服务（Flask）
-@app.wsgi(image=image)
-def web():
-    import os
-    os.chdir(WORKSPACE_PATH)
-    from app import app as flask_app
-    return flask_app
-
-# ✅ 后台任务（定时 curl、守护进程）
 @app.function(
     image=image,
-    timeout=86400,
-    max_containers=1,
-    min_containers=1,
+    max_containers=1,  # ✅ 替换旧版 concurrency_limit
+    min_containers=1,  # ✅ 替换旧版 keep_warm
+    timeout=86400,     # ✅ 最长运行时间 1 天
 )
-def background_worker():
+def run_app():
     import os
     import subprocess
-    import sys
 
-    os.chdir(WORKSPACE_PATH)
-    print("🚀 Starting app.py as background worker...")
+    os.chdir("/workspace")
+    print("🚀 Starting app.py...")
 
     with subprocess.Popen(
-        [sys.executable, "app.py"],
+        ["python3", "app.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
     ) as process:
         for line in process.stdout:
             print(line.strip())
+
+# 主程序：部署后远程执行
+if __name__ == "__main__":
+    app.deploy()
+    run_app.remote()
