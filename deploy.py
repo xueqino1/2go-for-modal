@@ -6,7 +6,7 @@ import sys
 # 配置常量
 APP_NAME = os.getenv("MODAL_APP_NAME", "python-sandbox")
 WORKSPACE_PATH = "/workspace"
-SCRIPT_NAME = "main.py"  # 替换为你的主脚本
+SCRIPT_NAME = "app.py"  # 替换为你的主脚本
 
 app = modal.App(name=APP_NAME)
 
