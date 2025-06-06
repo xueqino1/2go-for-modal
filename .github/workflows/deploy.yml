@@ -1,13 +1,14 @@
-name: Deploy to Modal
+name: Deploy Python Sandbox to Modal
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # 每天UTC午夜运行
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # 防止卡死
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
@@ -17,22 +18,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取完整提交历史
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          cache: 'pip'  # 启用pip缓存
 
-      - name: Install Modal SDK
-        run: pip install --upgrade modal
+      - name: Install dependencies
+        run: |
+          pip install --upgrade modal
+          pip install -r requirements.txt  # 提前安装本地依赖
 
-      - name: Inject Modal Token
+      - name: Configure Modal CLI
         run: |
           mkdir -p $MODAL_CONFIG_DIR
-          echo -e "[default]" > $MODAL_CONFIG_DIR/token.toml
-          echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
-          echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
+          cat > $MODAL_CONFIG_DIR/token.toml <<EOF
+          [default]
+          token_id = "$MODAL_TOKEN_ID"
+          token_secret = "$MODAL_TOKEN_SECRET"
+          EOF
 
-      - name: Deploy on Modal
-        run: modal run deploy.py
-
+      - name: Deploy to Modal
+        run: modal deploy --detach deploy.py
+        env:
+          PYTHONUNBUFFERED: 1  # 实时输出日志
