@@ -23,13 +23,8 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Modal SDK (latest 1.x)
-        run: |
-          pip install --upgrade pip
-          pip install 'modal>=1.0.0'
-
-      - name: Confirm Modal version
-        run: python -c "import modal; print('Modal version:', modal.__version__)"
+      - name: Install Modal SDK
+        run: pip install --upgrade modal
 
       - name: Inject Modal Token
         run: |
@@ -38,6 +33,5 @@ jobs:
           echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
 
-      - name: Deploy and run Flask app
-        run: |
-          modal deploy deploy.py
+      - name: Deploy and run on Modal
+        run: modal run deploy.py
