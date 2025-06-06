@@ -10,8 +10,8 @@ image = (
 
 @app.function(
     image=image,
-    max_containers=1,
-    min_containers=1,
+    concurrency_limit=1,
+    keep_warm=1,
     timeout=86400,
 )
 def run_app():
