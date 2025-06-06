@@ -18,14 +18,13 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Modal SDK
+      - name: Install Modal CLI
         run: pip install modal
 
-      - name: Set Modal Token (via modal CLI)
+      - name: Set Modal Token
         run: |
           mkdir -p ~/.modal
           echo -e "[default]\ntoken_id = \"${{ secrets.MODAL_TOKEN_ID }}\"\ntoken_secret = \"${{ secrets.MODAL_TOKEN_SECRET }}\"" > ~/.modal/token.toml
-          cat ~/.modal/token.toml  # ✅ 用于调试，可移除
 
-      - name: Deploy to Modal
-        run: python deploy.py
+      - name: Deploy via Modal CLI
+        run: modal deploy deploy.py
