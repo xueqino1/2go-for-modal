@@ -33,5 +33,8 @@ jobs:
           echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
 
-      - name: Deploy and run on Modal
+      - name: Deploy on Modal
         run: modal run deploy.py
+
+      - name: Start app on Modal
+        run: modal run deploy.py --run-app
