@@ -13,7 +13,7 @@ app = modal.App(name=APP_NAME)
 image = (
     modal.Image.debian_slim()
     .pip_install_from_requirements("requirements.txt")
-    .add_local_directory(".", remote_path=WORKSPACE_PATH)
+    .add_local_dir(".", remote_path=WORKSPACE_PATH)
 )
 
 @app.function(
