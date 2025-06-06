@@ -1,4 +1,4 @@
-name: Deploy Python Sandbox to Modal
+name: Deploy to Modal
 
 on:
   workflow_dispatch:
@@ -18,19 +18,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # 获取完整提交历史
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'  # 启用pip缓存
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           pip install --upgrade modal
-          pip install -r requirements.txt  # 提前安装本地依赖
+          pip install -r requirements.txt
 
       - name: Configure Modal CLI
         run: |
@@ -42,6 +40,6 @@ jobs:
           EOF
 
       - name: Deploy to Modal
-        run: modal deploy --detach deploy.py
-        env:
-          PYTHONUNBUFFERED: 1  # 实时输出日志
+        run: modal deploy deploy.py
+      - name: Deploy and run
+        run: modal run deploy.py --run
