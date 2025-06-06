@@ -22,9 +22,13 @@ jobs:
         run: pip install modal
 
       - name: Set Modal Token
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
         run: |
           mkdir -p ~/.modal
-          echo -e "[default]\ntoken_id = \"${{ secrets.MODAL_TOKEN_ID }}\"\ntoken_secret = \"${{ secrets.MODAL_TOKEN_SECRET }}\"" > ~/.modal/token.toml
+          echo -e "[default]\ntoken_id = \"${MODAL_TOKEN_ID}\"\ntoken_secret = \"${MODAL_TOKEN_SECRET}\"" > ~/.modal/token.toml
+          echo "Token file written."
 
       - name: Deploy via Modal CLI
         run: modal deploy deploy.py
