@@ -1,59 +1,41 @@
 import modal
 import os
 import subprocess
-import sys
 
-# 配置常量
-APP_NAME = os.getenv("MODAL_APP_NAME", "python-sandbox")
-WORKSPACE_PATH = "/workspace"
-SCRIPT_NAME = "app.py"  # 替换为你的主脚本
+# 创建 Modal 应用
+app = modal.App(name="persistent_app")
 
-app = modal.App(name=APP_NAME)
-
+# 定义镜像并添加本地目录（使用最新SDK方法名）
 image = (
     modal.Image.debian_slim()
     .pip_install_from_requirements("requirements.txt")
-    .add_local_dir(".", remote_path=WORKSPACE_PATH)
+    .copy_local_dir(".", remote_path="/workspace")  # 修改为copy_local_dir
 )
 
+# 定义运行主函数
 @app.function(
     image=image,
-    timeout=86400,
-    secrets=[modal.Secret.from_name("my-env-secrets")]  # 可选
+    concurrency_limit=1,  # 新版SDK仍支持
+    keep_warm=1,         # 新版SDK仍支持
+    timeout=86400,       # 24小时超时
 )
-def run_script():
-    """执行目标Python脚本"""
-    try:
-        os.chdir(WORKSPACE_PATH)
-        print(f"🏃 Starting {SCRIPT_NAME} in {os.getcwd()}")
+def run_app():
+    import os
+    import subprocess
 
-        result = subprocess.run(
-            [sys.executable, SCRIPT_NAME],
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        print("✅ Execution succeeded:")
-        print(result.stdout)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Execution failed (code {e.returncode}):")
-        print(e.stderr)
-        return False
+    os.chdir("/workspace")
+    print("🔄 Starting app.py...")
+    
+    with subprocess.Popen(
+        ["python3", "app.py"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    ) as process:
+        for line in process.stdout:
+            print(line.strip())  # 实时输出日志
 
+# 部署应用（不自动运行）
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--run", action="store_true")
-    args = parser.parse_args()
-
-    if args.run:
-        print("🚀 Deploying and running...")
-        with app.run():
-            success = run_script.remote()
-            if not success:
-                raise SystemExit(1)
-    else:
-        print("🚀 Deploying only...")
-        app.deploy("sandbox-deployment")
+    print("🚀 Deploying application...")
+    app.deploy("my-persistent-app")  # 添加部署名称便于管理
