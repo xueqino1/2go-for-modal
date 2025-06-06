@@ -2,7 +2,6 @@ import modal
 
 app = modal.App(name="persistent_app")
 
-# 构建镜像，包含 requirements 和工作目录
 image = (
     modal.Image.debian_slim()
     .pip_install_from_requirements("requirements.txt")
@@ -11,8 +10,8 @@ image = (
 
 @app.function(
     image=image,
-    concurrency_limit=1,
-    keep_warm=1,
+    max_containers=1,        # ✅ 新参数名，替换 concurrency_limit
+    min_containers=1,        # ✅ 新参数名，替换 keep_warm
     timeout=86400,
 )
 def run_app():
