@@ -36,5 +36,3 @@ jobs:
       - name: Deploy on Modal
         run: modal run deploy.py
 
-      - name: Start app on Modal
-        run: modal run deploy.py --run-app
