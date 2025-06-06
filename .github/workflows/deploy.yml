@@ -32,7 +32,6 @@ jobs:
           echo -e "[default]" > $MODAL_CONFIG_DIR/token.toml
           echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
-          cat $MODAL_CONFIG_DIR/token.toml  # ✅ 用于调试，可删
 
       - name: Deploy to Modal
         run: modal deploy deploy.py
