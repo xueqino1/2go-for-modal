@@ -18,19 +18,17 @@ image = (
     timeout=86400,
 )
 def run_app():
-    import os
     import subprocess
+    import os
 
     os.chdir("/workspace")
-    with subprocess.Popen(
+    # 后台执行，立刻返回
+    subprocess.Popen(
         ["python3", "app.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    ) as process:
-        print("Starting app.py...")
-        for line in process.stdout:
-            print(line.strip())
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    print("App launched in background")
 
 @app.local_entrypoint()
 def main():
