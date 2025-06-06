@@ -4,9 +4,7 @@ app = modal.App(name="persistent_app")
 
 image = (
     modal.Image.debian_slim()
-    .run_commands(
-        "apt-get update && apt-get install -y curl"
-    )
+    .apt_install("curl")  # ✅ 加上你需要的 curl
     .pip_install_from_requirements("requirements.txt")
     .add_local_dir(".", remote_path="/workspace")
 )
@@ -18,19 +16,21 @@ image = (
     timeout=86400,
 )
 def run_app():
-    import subprocess
     import os
+    import subprocess
 
     os.chdir("/workspace")
-    # 后台执行，立刻返回
-    subprocess.Popen(
+    with subprocess.Popen(
         ["python3", "app.py"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    print("App launched in background")
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    ) as process:
+        print("Starting app.py...")
+        for line in process.stdout:
+            print(line.strip())
 
-@app.local_entrypoint()
-def main():
-    print("Triggering run_app remotely...")
+# 👇 主程序里部署并立即远程执行
+if __name__ == "__main__":
+    app.deploy()
     run_app.remote()
