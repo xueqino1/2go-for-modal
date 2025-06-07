@@ -22,15 +22,11 @@ def run_app():
     import subprocess
 
     os.chdir("/workspace")
-    with subprocess.Popen(
+    subprocess.Popen(
         ["python3", "app.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    ) as process:
-        print("Starting app.py...")
-        for line in process.stdout:
-            print(line.strip())
+        preexec_fn=os.setsid  # 启动独立 session，Modal 函数结束不杀它
+    )
+    print("Started app.py")
 
 # ✅ 增加 local_entrypoint，modal run 时触发远程调用
 @app.local_entrypoint()
