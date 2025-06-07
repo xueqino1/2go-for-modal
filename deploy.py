@@ -10,7 +10,7 @@ image = (
     modal.Image.debian_slim()
     .apt_install("curl")  # 安装curl
     .pip_install_from_requirements("requirements.txt")
-    .copy_local_dir(".", to_path="/workspace")  # 复制本地代码到镜像
+    .add_local_dir(".", to_path="/workspace")  # 复制本地代码到镜像
 )
 
 @app.function(
