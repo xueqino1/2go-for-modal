@@ -3,17 +3,16 @@ name: Deploy to Modal
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # 每天UTC午夜运行
+    - cron: '0 0 * * *'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # 防止卡死
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
-      MODAL_CONFIG_DIR: /home/runner/.modal
+      MODAL_CONFIG_DIR: /home/runner/.modal  # 强制写入 Modal CLI 配置目录
 
     steps:
       - name: Checkout code
@@ -23,23 +22,21 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade modal
-          pip install -r requirements.txt
+      - name: Install Modal SDK
+        run: pip install modal
 
-      - name: Configure Modal CLI
+      - name: Inject Modal Token
         run: |
           mkdir -p $MODAL_CONFIG_DIR
-          cat > $MODAL_CONFIG_DIR/token.toml <<EOF
-          [default]
-          token_id = "$MODAL_TOKEN_ID"
-          token_secret = "$MODAL_TOKEN_SECRET"
-          EOF
+          echo -e "[default]" > $MODAL_CONFIG_DIR/token.toml
+          echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
+          echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
+          cat $MODAL_CONFIG_DIR/token.toml  # ✅ 用于调试，可删
 
+      
       - name: Deploy to Modal
         run: modal deploy deploy.py
-      - name: Deploy and run
-        run: modal run deploy.py --run
+
+      - name: Run app remotely
+        run: modal run deploy.py
