@@ -2,7 +2,7 @@ import modal
 import subprocess
 import os
 
-app = modal.App("webapp")
+app = modal.App(name="persistent_app")
 
 image = (
     modal.Image.debian_slim()
@@ -13,17 +13,19 @@ image = (
 
 @app.function(
     image=image,
-    timeout=86400,
-    max_retries=0,
+    timeout=86400,  # 只加timeout，别加max_containers等
 )
 def run_app():
     os.chdir("/workspace")
-    print("Starting app.py ...")
-    # 用 subprocess 调用 app.py，捕获输出
-    result = subprocess.run(["python3", "app.py"], capture_output=True, text=True)
-    print(result.stdout)
-    if result.stderr:
-        print("Error:", result.stderr)
+    print("Starting app.py...")
+    with subprocess.Popen(
+        ["python3", "app.py"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    ) as process:
+        for line in process.stdout:
+            print(line.strip())
 
 @app.local_entrypoint()
 def main():
