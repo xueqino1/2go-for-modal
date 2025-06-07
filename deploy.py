@@ -1,35 +1,27 @@
 import modal
 
-app = modal.App(name="persistent_app")
+# 定义 Modal App 名称
+app = modal.App(name="sandboxed-app")
 
+# 构建镜像：包含你项目依赖和文件
 image = (
     modal.Image.debian_slim()
-    .run_commands(
-        "apt-get update && apt-get install -y curl"
-    )
+    .run_commands("apt-get update && apt-get install -y curl")  # 如有需要
     .pip_install_from_requirements("requirements.txt")
-    .add_local_dir(".", remote_path="/workspace")
+    .add_local_dir(".", remote_path="/workspace")  # 把整个目录上传进去
 )
 
-@app.function(
-    image=image,
-    max_containers=1,      # ✅ 新参数名，替换掉旧的
-    min_containers=1,
-    timeout=86400,
-)
-def run_app():
-    import os
-    import subprocess
-
-    os.chdir("/workspace")
-    subprocess.Popen(
-        ["python3", "app.py"],
-        preexec_fn=os.setsid  # 启动独立 session，Modal 函数结束不杀它
-    )
-    print("Started app.py")
-
-# ✅ 增加 local_entrypoint，modal run 时触发远程调用
 @app.local_entrypoint()
 def main():
-    print("Triggering run_app remotely...")
-    run_app.remote()
+    print("Creating sandbox...")
+
+    # 创建 Sandbox 容器，使用自定义镜像
+    sb = modal.Sandbox.create(app=app, image=image)
+
+    # 可选：进入工作目录
+    sb.exec("cd", "/workspace")
+
+    # 启动 app.py（后台运行）
+    sb.exec("python3", "-u", "/workspace/app.py")  # -u 关闭缓冲，立即输出
+
+    print("App started inside sandbox.")
