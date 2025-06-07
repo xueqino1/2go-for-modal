@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes:5   
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
@@ -41,4 +42,4 @@ jobs:
         run: modal deploy deploy.py
 
       - name: Run app remotely
-        run: modal run deploy.py
+        run: modal run --detach deploy.py
