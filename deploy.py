@@ -18,7 +18,7 @@ image = (
 def run_app():
     os.chdir("/workspace")
     print("Starting app.py...")
-    with subprocess.Popen(
+    with subprocess.run(
         ["python3", "app.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
