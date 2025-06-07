@@ -1,3 +1,2 @@
-modal>=1.0.0
 Flask
 requests
