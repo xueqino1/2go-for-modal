@@ -1,6 +1,8 @@
 import modal
+import subprocess
+import os
 
-app = modal.App(name="sandboxed-app")
+app = modal.App("webapp")
 
 image = (
     modal.Image.debian_slim()
@@ -9,17 +11,21 @@ image = (
     .add_local_dir(".", remote_path="/workspace")
 )
 
-# ✅ 用新式 API 创建 sandbox
-sandbox = modal.Sandbox.from_image(
+@app.function(
     image=image,
-    mounts=[
-        modal.Mount.from_local_dir(".", remote_path="/workspace")
-    ],
-    name="main-sandbox"
+    timeout=86400,
+    max_retries=0,
 )
+def run_app():
+    os.chdir("/workspace")
+    print("Starting app.py ...")
+    # 用 subprocess 调用 app.py，捕获输出
+    result = subprocess.run(["python3", "app.py"], capture_output=True, text=True)
+    print(result.stdout)
+    if result.stderr:
+        print("Error:", result.stderr)
 
 @app.local_entrypoint()
 def main():
-    print("Creating sandbox...")
-    p = sandbox.exec("python3", "-u", "/workspace/app.py")
-    print(p.stdout.read())
+    print("Triggering run_app remotely...")
+    run_app.remote()
