@@ -24,7 +24,8 @@ jobs:
           python-version: '3.10'
 
       - name: Install Modal SDK
-        run: pip install --upgrade modal
+  run: |
+    pip install --no-cache-dir --upgrade "modal>=0.58.0"
 
       - name: Inject Modal Token
         run: |
