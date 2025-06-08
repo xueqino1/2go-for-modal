@@ -43,8 +43,8 @@ def run_app():
 
 if __name__ == "__main__":
     print("🚀 Deploying application...")
-    app.deploy("production-deployment")
+    app.deploy()  # ✅ 修复点：不要加参数
 
     print("⚙️ Launching remote run...")
-    run_app.spawn()  # ✅ 非阻塞启动
+    run_app.spawn()  # ✅ 异步执行函数
     print("✅ Deployment and remote launch complete.")
