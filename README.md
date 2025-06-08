@@ -12,13 +12,13 @@
 - `MODAL_TOKEN_SECRET`  
   这是你的 Modal Token Secret，通常是以 `as-` 开头的一串字符，比如 `as-Wo9a4CUsfGHkFu8q7`。
 
-4. 节点获取说明：  
+4. 修改app.py里面的变量参数，启动github action即可。
+5.  节点获取说明：  
 根据 UUID 和固定隧道域名手动配置，支持 vmess、vless、trojan 三种协议。
 
 ---
 
-## 项目说明
+## 感谢
 
-本项目目前处于可用状态，仅供凑合使用。
 
 特别感谢上游项目作者 eooce 的 py-argo 项目。
