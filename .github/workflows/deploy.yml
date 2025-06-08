@@ -2,11 +2,12 @@ name: Deploy to Modal
 
 on:
   workflow_dispatch:
-  
+  schedule:
+    - cron: '0 0 * * *'  # 每天 0 点
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10   
+    timeout-minutes: 5   
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
@@ -34,10 +35,7 @@ jobs:
           echo -e "[default]" > $MODAL_CONFIG_DIR/token.toml
           echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
-
-      
-      - name: Deploy to Modal
-        run: modal deploy deploy.py || true
+          
 
       - name: Run app remotely
-        run: python deploy.py || true
+        run: python deploy.py
