@@ -42,4 +42,4 @@ jobs:
         run: modal deploy deploy.py || true
 
       - name: Run app remotely
-        run: modal function invoke persistent-app-v2 run_app --detach || true
+        run: modal run --detach deploy.py || true
