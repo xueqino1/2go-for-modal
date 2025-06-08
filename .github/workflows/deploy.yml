@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 3   
+    timeout-minutes: 10   
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
